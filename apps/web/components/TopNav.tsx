@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useGameStore } from '@/lib/store';
+import { useAuth } from '@/hooks/useAuth';
 
 const navItems = [
   { href: '/', label: 'Play' },
@@ -15,11 +16,10 @@ const navItems = [
 export default function TopNav() {
   const pathname = usePathname();
   const { totalXP, completedLevels } = useGameStore();
+  const { user, signOut } = useAuth();
 
   // Hide nav during gameplay
-  const isPlaying = pathname.startsWith('/play/');
-
-  if (isPlaying) return null;
+  if (pathname.startsWith('/play/')) return null;
 
   return (
     <nav className="h-12 bg-cyber-surface border-b border-cyber-purple flex items-center px-4 justify-between">
@@ -59,12 +59,33 @@ export default function TopNav() {
       <div className="flex items-center gap-4">
         <span className="text-cyber-yellow text-sm font-medium">{totalXP} XP</span>
         <span className="text-cyber-muted text-sm">{completedLevels.length} levels</span>
-        <Link
-          href="/profile"
-          className="w-8 h-8 rounded-full bg-cyber-purple flex items-center justify-center text-cyber-green text-xs font-bold hover:bg-cyber-purple-light transition-colors"
-        >
-          U
-        </Link>
+        {user ? (
+          <div className="flex items-center gap-2">
+            <Link
+              href="/profile"
+              className="w-8 h-8 rounded-full bg-cyber-purple flex items-center justify-center text-cyber-green text-xs font-bold hover:bg-cyber-purple-light transition-colors overflow-hidden"
+            >
+              {user.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                (user.user_metadata?.preferred_username || user.email || 'U')[0].toUpperCase()
+              )}
+            </Link>
+            <button
+              onClick={signOut}
+              className="text-cyber-muted text-xs hover:text-cyber-white"
+            >
+              Sign out
+            </button>
+          </div>
+        ) : (
+          <Link
+            href="/auth"
+            className="px-3 py-1.5 bg-cyber-green text-cyber-bg text-sm font-bold rounded-md hover:opacity-90 transition-opacity"
+          >
+            Sign in
+          </Link>
+        )}
       </div>
     </nav>
   );
