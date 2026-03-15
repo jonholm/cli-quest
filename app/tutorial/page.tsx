@@ -1,22 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEscapeToHub } from '@/hooks/useEscapeToHub';
 
 export default function Tutorial() {
   const router = useRouter();
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        router.push('/hub');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [router]);
+  useEscapeToHub();
 
   return (
     <div className="min-h-screen bg-terminal-bg p-8">

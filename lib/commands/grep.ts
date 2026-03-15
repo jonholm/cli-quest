@@ -1,6 +1,7 @@
 import { GameState } from '../types';
-import { getNode, listDirectory } from '../fileSystem';
+import { getNode, resolvePath } from '../fileSystem';
 import { ParsedCommand } from '../commandParser';
+import { safeRegex } from '../utils';
 
 export function grep(state: GameState, parsed: ParsedCommand): string {
   const { args, flags } = parsed;
@@ -16,7 +17,8 @@ export function grep(state: GameState, parsed: ParsedCommand): string {
     throw new Error('grep: missing file operand');
   }
 
-  const node = getNode(state.fileSystem, state.currentPath + '/' + fileName);
+  const filePath = resolvePath(state.currentPath, fileName);
+  const node = getNode(state.fileSystem, filePath);
 
   if (!node) {
     throw new Error(`grep: ${fileName}: No such file or directory`);
@@ -30,7 +32,7 @@ export function grep(state: GameState, parsed: ParsedCommand): string {
   const lines = content.split('\n');
   const caseInsensitive = flags['i'] === true;
 
-  const regex = new RegExp(pattern, caseInsensitive ? 'i' : '');
+  const regex = safeRegex(pattern, caseInsensitive ? 'i' : '');
   const matchingLines = lines.filter(line => regex.test(line));
 
   if (matchingLines.length === 0) {

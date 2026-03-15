@@ -16,9 +16,9 @@ export default function OutputDisplay({ history, prompt }: OutputDisplayProps) {
   }, [history]);
 
   return (
-    <div className="flex-1 overflow-y-auto mb-4">
-      {history.map((item, index) => (
-        <div key={index} className="mb-2">
+    <div role="log" aria-live="polite" className="flex-1 overflow-y-auto mb-4">
+      {history.map((item) => (
+        <div key={item.id} className="mb-2">
           <div className="text-terminal-green">
             {prompt} <span className="text-terminal-white">{item.input}</span>
           </div>

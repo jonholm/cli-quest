@@ -13,6 +13,7 @@ export default function HintButton({ onUseHint, hintsUsed, totalHints }: HintBut
     <button
       onClick={onUseHint}
       disabled={!hasMoreHints}
+      aria-label={`Use hint (${hintsUsed} of ${totalHints} used)`}
       className={`px-4 py-2 border ${
         hasMoreHints
           ? 'border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-terminal-bg'

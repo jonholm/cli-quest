@@ -43,6 +43,7 @@ export type UserProgress = {
 };
 
 export type CommandOutput = {
+  id: number;
   input: string;
   output: string;
   isError: boolean;

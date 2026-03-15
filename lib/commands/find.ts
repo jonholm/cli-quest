@@ -1,13 +1,16 @@
 import { GameState, FSNode } from '../types';
 import { getNode } from '../fileSystem';
 import { ParsedCommand } from '../commandParser';
+import { safeRegex } from '../utils';
 
 export function find(state: GameState, parsed: ParsedCommand): string {
   const { args, flags } = parsed;
 
   const startPath = args[0] || '.';
-  const namePattern = flags['name'] as string;
-  const typeFilter = flags['type'] as string;
+  const nameFlag = flags['name'];
+  const namePattern = typeof nameFlag === 'string' ? nameFlag : undefined;
+  const typeFlag = flags['type'];
+  const typeFilter = typeof typeFlag === 'string' ? typeFlag : undefined;
 
   const startNode = getNode(state.fileSystem,
     startPath === '.' ? state.currentPath : startPath);
@@ -22,7 +25,7 @@ export function find(state: GameState, parsed: ParsedCommand): string {
     let matches = true;
 
     if (namePattern) {
-      const regex = new RegExp(namePattern.replace(/\*/g, '.*'));
+      const regex = safeRegex(namePattern.replace(/\*/g, '.*'));
       matches = matches && regex.test(node.name);
     }
 

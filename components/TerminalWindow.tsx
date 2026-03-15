@@ -23,7 +23,7 @@ export default function TerminalWindow({ children, title = 'CLI Quest' }: Termin
         {/* MacOS Title Bar */}
         <div className="bg-gray-800 px-4 py-3 flex items-center justify-between border-b border-gray-700">
           {/* Traffic Light Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" aria-hidden="true">
             <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors" />
             <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors" />
             <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors" />

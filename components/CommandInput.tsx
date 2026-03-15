@@ -40,6 +40,7 @@ export default function CommandInput({ prompt, onSubmit }: CommandInputProps) {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
+        aria-label="Terminal command input"
         className="flex-1 bg-transparent outline-none text-terminal-white caret-terminal-green"
         autoFocus
         spellCheck={false}

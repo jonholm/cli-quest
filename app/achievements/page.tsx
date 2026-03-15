@@ -1,9 +1,70 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { useStore } from '@/lib/store';
 import { allLevels } from '@/data/allLevels';
+import { useEscapeToHub } from '@/hooks/useEscapeToHub';
+import { ACHIEVEMENT_THRESHOLDS } from '@/lib/constants';
+
+const achievementDefinitions = [
+  {
+    id: 'first_steps',
+    title: 'First Steps',
+    description: 'Complete your first level',
+    icon: '[*]',
+    check: (levels: number, _commands: number, _xp: number, _total: number) => levels >= ACHIEVEMENT_THRESHOLDS.FIRST_STEPS,
+  },
+  {
+    id: 'apprentice',
+    title: 'Apprentice',
+    description: 'Complete 5 levels',
+    icon: '[**]',
+    check: (levels: number) => levels >= ACHIEVEMENT_THRESHOLDS.APPRENTICE,
+  },
+  {
+    id: 'journeyman',
+    title: 'Journeyman',
+    description: 'Complete 10 levels',
+    icon: '[***]',
+    check: (levels: number) => levels >= ACHIEVEMENT_THRESHOLDS.JOURNEYMAN,
+  },
+  {
+    id: 'master',
+    title: 'Master',
+    description: 'Complete all levels',
+    icon: '[MASTER]',
+    check: (levels: number, _commands: number, _xp: number, total: number) => levels === total,
+  },
+  {
+    id: 'explorer',
+    title: 'Explorer',
+    description: 'Execute 100 commands',
+    icon: '[EXP]',
+    check: (_levels: number, commands: number) => commands >= ACHIEVEMENT_THRESHOLDS.EXPLORER_COMMANDS,
+  },
+  {
+    id: 'power_user',
+    title: 'Power User',
+    description: 'Execute 500 commands',
+    icon: '[PWR]',
+    check: (_levels: number, commands: number) => commands >= ACHIEVEMENT_THRESHOLDS.POWER_USER_COMMANDS,
+  },
+  {
+    id: 'xp_hunter',
+    title: 'XP Hunter',
+    description: 'Earn 1000 XP',
+    icon: '[XP+]',
+    check: (_levels: number, _commands: number, xp: number) => xp >= ACHIEVEMENT_THRESHOLDS.XP_HUNTER,
+  },
+  {
+    id: 'xp_legend',
+    title: 'XP Legend',
+    description: 'Earn 5000 XP',
+    icon: '[XP++]',
+    check: (_levels: number, _commands: number, xp: number) => xp >= ACHIEVEMENT_THRESHOLDS.XP_LEGEND,
+  },
+];
 
 export default function Achievements() {
   const router = useRouter();
@@ -11,79 +72,18 @@ export default function Achievements() {
   const totalXP = useStore((state) => state.totalXP || 0);
   const commandsExecuted = useStore((state) => state.commandsExecuted || 0);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        router.push('/hub');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [router]);
+  useEscapeToHub();
 
   const totalLevels = allLevels.length;
   const completionRate = Math.round((completedLevels.length / totalLevels) * 100);
 
-  const achievements = [
-    {
-      id: 'first_steps',
-      title: 'First Steps',
-      description: 'Complete your first level',
-      icon: '[*]',
-      unlocked: completedLevels.length >= 1,
-    },
-    {
-      id: 'apprentice',
-      title: 'Apprentice',
-      description: 'Complete 5 levels',
-      icon: '[**]',
-      unlocked: completedLevels.length >= 5,
-    },
-    {
-      id: 'journeyman',
-      title: 'Journeyman',
-      description: 'Complete 10 levels',
-      icon: '[***]',
-      unlocked: completedLevels.length >= 10,
-    },
-    {
-      id: 'master',
-      title: 'Master',
-      description: 'Complete all levels',
-      icon: '[MASTER]',
-      unlocked: completedLevels.length === totalLevels,
-    },
-    {
-      id: 'explorer',
-      title: 'Explorer',
-      description: 'Execute 100 commands',
-      icon: '[EXP]',
-      unlocked: commandsExecuted >= 100,
-    },
-    {
-      id: 'power_user',
-      title: 'Power User',
-      description: 'Execute 500 commands',
-      icon: '[PWR]',
-      unlocked: commandsExecuted >= 500,
-    },
-    {
-      id: 'xp_hunter',
-      title: 'XP Hunter',
-      description: 'Earn 1000 XP',
-      icon: '[XP+]',
-      unlocked: totalXP >= 1000,
-    },
-    {
-      id: 'xp_legend',
-      title: 'XP Legend',
-      description: 'Earn 5000 XP',
-      icon: '[XP++]',
-      unlocked: totalXP >= 5000,
-    },
-  ];
+  const achievements = useMemo(() =>
+    achievementDefinitions.map((def) => ({
+      ...def,
+      unlocked: def.check(completedLevels.length, commandsExecuted, totalXP, totalLevels),
+    })),
+    [completedLevels.length, commandsExecuted, totalXP, totalLevels]
+  );
 
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
 

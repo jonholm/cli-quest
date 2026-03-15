@@ -17,6 +17,11 @@ export function cp(state: GameState, parsed: ParsedCommand): { newFS: FSNode; ou
     throw new Error(`cp: cannot stat '${args[0]}': No such file or directory`);
   }
 
+  const existingDest = getNode(state.fileSystem, destPath);
+  if (existingDest) {
+    throw new Error(`cp: cannot copy to '${args[1]}': File exists`);
+  }
+
   const newFS = createNode(state.fileSystem, destPath, cloneFS(sourceNode));
 
   return { newFS, output: '' };

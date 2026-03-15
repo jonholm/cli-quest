@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { allLevels } from '@/data/allLevels';
 import { useStore } from '@/lib/store';
@@ -8,6 +8,7 @@ import Terminal from '@/components/Terminal';
 import LevelObjective from '@/components/LevelObjective';
 import HintButton from '@/components/HintButton';
 import LevelComplete from '@/components/LevelComplete';
+import { HINT_DISPLAY_MS } from '@/lib/constants';
 
 export default function PlayLevel() {
   const params = useParams();
@@ -23,6 +24,9 @@ export default function PlayLevel() {
     commandCount,
     completedLevels,
     history,
+    fileSystem,
+    currentPath,
+    lastOutput,
   } = useStore();
 
   const [hintMessage, setHintMessage] = useState<string | null>(null);
@@ -36,14 +40,33 @@ export default function PlayLevel() {
     }
   }, [levelId, level, currentLevel, loadLevel]);
 
+  // Check level completion using reactive state instead of getState()
   useEffect(() => {
     if (level && completedLevels.includes(levelId)) {
       const lastCommand = history[history.length - 1];
-      if (lastCommand && level.validator(useStore.getState())) {
-        setShowComplete(true);
+      if (lastCommand) {
+        const validationState = {
+          currentPath,
+          fileSystem,
+          history,
+          hintsUsed,
+          commandCount,
+          lastOutput,
+        };
+        if (level.validator(validationState)) {
+          setShowComplete(true);
+        }
       }
     }
-  }, [completedLevels, levelId, level, history]);
+  }, [completedLevels, levelId, level, history, currentPath, fileSystem, hintsUsed, commandCount, lastOutput]);
+
+  const handleUseHint = useCallback(() => {
+    const hint = useHint();
+    if (hint) {
+      setHintMessage(hint);
+      setTimeout(() => setHintMessage(null), HINT_DISPLAY_MS);
+    }
+  }, [useHint]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -63,7 +86,7 @@ export default function PlayLevel() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showComplete, router]);
+  }, [showComplete, router, handleUseHint, resetLevel]);
 
   if (!level) {
     return (
@@ -72,14 +95,6 @@ export default function PlayLevel() {
       </div>
     );
   }
-
-  const handleUseHint = () => {
-    const hint = useHint();
-    if (hint) {
-      setHintMessage(hint);
-      setTimeout(() => setHintMessage(null), 5000);
-    }
-  };
 
   // Find next level in the same zone
   const currentLevelIndex = allLevels.findIndex((l) => l.id === levelId);
@@ -120,12 +135,14 @@ export default function PlayLevel() {
           </div>
         </div>
 
-        {hintMessage && (
-          <div className="bg-yellow-900 bg-opacity-50 border-l-4 border-yellow-500 p-4 m-4">
-            <div className="text-yellow-200 font-bold mb-1">HINT:</div>
-            <div className="text-yellow-100">{hintMessage}</div>
-          </div>
-        )}
+        <div aria-live="assertive">
+          {hintMessage && (
+            <div className="bg-yellow-900 bg-opacity-50 border-l-4 border-yellow-500 p-4 m-4">
+              <div className="text-yellow-200 font-bold mb-1">HINT:</div>
+              <div className="text-yellow-100">{hintMessage}</div>
+            </div>
+          )}
+        </div>
 
         <div className="flex-1 flex flex-col overflow-hidden">
           <LevelObjective objective={level.objective} />

@@ -4,6 +4,9 @@ import { GameState, FSNode, CommandOutput } from './types';
 import { executeCommand } from './commandExecutor';
 import { allLevels } from '@/data/allLevels';
 import { cloneFS } from './fileSystem';
+import { HOME_DIRECTORY } from './constants';
+
+let nextOutputId = 1;
 
 interface Store extends GameState {
   currentLevel: string | null;
@@ -12,6 +15,7 @@ interface Store extends GameState {
   commandsExecuted: number;
   executeCommand: (input: string) => void;
   loadLevel: (levelId: string) => void;
+  loadSandbox: (fs: FSNode) => void;
   useHint: () => string | null;
   resetLevel: () => void;
   completeLevel: () => void;
@@ -22,7 +26,7 @@ export const useStore = create<Store>()(
     (set, get) => ({
       // Game state
       currentLevel: null,
-      currentPath: '/home/user',
+      currentPath: HOME_DIRECTORY,
       fileSystem: {
         type: 'directory',
         name: '',
@@ -49,14 +53,14 @@ export const useStore = create<Store>()(
           return;
         }
 
-        const newHistory: CommandOutput[] = [
-          ...state.history,
-          {
-            input,
-            output: result.output,
-            isError: result.isError,
-          },
-        ];
+        const newEntry: CommandOutput = {
+          id: nextOutputId++,
+          input,
+          output: result.output,
+          isError: result.isError,
+        };
+
+        const newHistory = [...state.history, newEntry];
 
         set({
           history: newHistory,
@@ -79,7 +83,6 @@ export const useStore = create<Store>()(
             };
 
             if (level.validator(updatedState)) {
-              // Level completed!
               setTimeout(() => {
                 get().completeLevel();
               }, 500);
@@ -96,6 +99,18 @@ export const useStore = create<Store>()(
           currentLevel: levelId,
           currentPath: level.startingPath,
           fileSystem: cloneFS(level.initialFS),
+          history: [],
+          hintsUsed: 0,
+          commandCount: 0,
+          lastOutput: '',
+        });
+      },
+
+      loadSandbox: (fs: FSNode) => {
+        set({
+          currentLevel: null,
+          currentPath: HOME_DIRECTORY,
+          fileSystem: cloneFS(fs),
           history: [],
           hintsUsed: 0,
           commandCount: 0,

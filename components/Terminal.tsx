@@ -13,7 +13,7 @@ export default function Terminal() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-terminal-bg text-terminal-white p-4 font-mono overflow-hidden">
+    <div role="region" aria-label="Terminal" className="flex flex-col h-full bg-terminal-bg text-terminal-white p-4 font-mono overflow-hidden">
       <OutputDisplay history={history} prompt={getPrompt()} />
       <CommandInput prompt={getPrompt()} onSubmit={executeCommand} />
     </div>

@@ -17,6 +17,11 @@ export function mv(state: GameState, parsed: ParsedCommand): { newFS: FSNode; ou
     throw new Error(`mv: cannot stat '${args[0]}': No such file or directory`);
   }
 
+  const existingDest = getNode(state.fileSystem, destPath);
+  if (existingDest) {
+    throw new Error(`mv: cannot move to '${args[1]}': File exists`);
+  }
+
   let newFS = deleteNode(state.fileSystem, sourcePath);
   newFS = createNode(newFS, destPath, sourceNode);
 

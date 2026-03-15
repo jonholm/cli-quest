@@ -1,57 +1,46 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { zoneInfo } from '@/data/allLevels';
 import { useStore } from '@/lib/store';
+import { useGridNavigation } from '@/hooks/useGridNavigation';
 
 type ZoneKey = keyof typeof zoneInfo;
+
+const zones = Object.entries(zoneInfo) as [ZoneKey, typeof zoneInfo[ZoneKey]][];
 
 export default function Hub() {
   const router = useRouter();
   const [selectedZone, setSelectedZone] = useState<number>(0);
   const completedLevels = useStore((state) => state.completedLevels);
 
-  const zones = Object.entries(zoneInfo) as [ZoneKey, typeof zoneInfo[ZoneKey]][];
+  const handleConfirm = useCallback(() => {
+    const [zoneKey] = zones[selectedZone];
+    router.push(`/zone/${zoneKey}`);
+  }, [selectedZone, router]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowRight':
-        case 'ArrowDown':
-          e.preventDefault();
-          setSelectedZone((prev) => (prev + 1) % zones.length);
-          break;
-        case 'ArrowLeft':
-        case 'ArrowUp':
-          e.preventDefault();
-          setSelectedZone((prev) => (prev - 1 + zones.length) % zones.length);
-          break;
-        case 'Enter':
-          e.preventDefault();
-          const [zoneKey] = zones[selectedZone];
-          router.push(`/zone/${zoneKey}`);
-          break;
-        case 'h':
-        case 'H':
-          if (!e.ctrlKey && !e.metaKey) {
-            e.preventDefault();
-            router.push('/tutorial');
-          }
-          break;
-        case 'a':
-        case 'A':
-          if (!e.ctrlKey && !e.metaKey) {
-            e.preventDefault();
-            router.push('/achievements');
-          }
-          break;
-      }
-    };
+  const handleAdditionalKeys = useCallback((e: KeyboardEvent) => {
+    if ((e.key === 'h' || e.key === 'H') && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      router.push('/tutorial');
+      return true;
+    }
+    if ((e.key === 'a' || e.key === 'A') && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      router.push('/achievements');
+      return true;
+    }
+    return false;
+  }, [router]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedZone, zones, router]);
+  useGridNavigation({
+    itemCount: zones.length,
+    selectedIndex: selectedZone,
+    onSelect: setSelectedZone,
+    onConfirm: handleConfirm,
+    additionalKeys: handleAdditionalKeys,
+  });
 
   const getZoneColor = (color: string) => {
     const colors: Record<string, string> = {
@@ -85,14 +74,15 @@ export default function Hub() {
             const colorClass = getZoneColor(zone.color);
 
             return (
-              <div
+              <button
                 key={zoneKey}
                 onClick={() => {
                   setSelectedZone(index);
                   router.push(`/zone/${zoneKey}`);
                 }}
                 onMouseEnter={() => setSelectedZone(index)}
-                className={`border-4 p-8 cursor-pointer transition-all outline-none ${
+                aria-label={`${zone.title} zone: ${zone.description}`}
+                className={`border-4 p-8 cursor-pointer transition-all outline-none text-left ${
                   isSelected
                     ? `${colorClass} bg-opacity-20 scale-105 shadow-lg`
                     : 'border-terminal-green bg-terminal-green bg-opacity-0 hover:bg-opacity-10'
@@ -107,7 +97,7 @@ export default function Hub() {
                 <p className="text-terminal-white opacity-80 text-center">
                   {zone.description}
                 </p>
-              </div>
+              </button>
             );
           })}
         </div>

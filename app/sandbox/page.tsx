@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import Terminal from '@/components/Terminal';
 import { FSNode } from '@/lib/types';
+import { useEscapeToHub } from '@/hooks/useEscapeToHub';
 
 const sandboxFS: FSNode = {
   type: 'directory',
@@ -31,44 +31,25 @@ const sandboxFS: FSNode = {
 };
 
 export default function Sandbox() {
-  const router = useRouter();
-  const { loadLevel } = useStore();
+  const { loadSandbox } = useStore();
+
+  useEscapeToHub();
 
   useEffect(() => {
-    loadLevel('sandbox');
-    useStore.setState({
-      currentPath: '/home/user',
-      fileSystem: sandboxFS,
-      history: [],
-      hintsUsed: 0,
-      commandCount: 0,
-      lastOutput: '',
-    });
-  }, []);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        router.push('/hub');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [router]);
+    loadSandbox(sandboxFS);
+  }, [loadSandbox]);
 
   return (
     <div className="min-h-screen bg-terminal-bg flex flex-col">
       <div className="flex-1 flex flex-col max-w-6xl mx-auto w-full">
         <div className="p-4 border-b border-purple-500 flex items-center justify-between bg-purple-900 bg-opacity-20">
           <div>
-            <button
-              onClick={() => router.push('/hub')}
+            <a
+              href="/hub"
               className="text-purple-400 hover:underline mr-6"
             >
               ← Back to Hub
-            </button>
+            </a>
             <span className="text-terminal-white">
               <span className="font-bold">[SANDBOX] Lab</span> - Free Exploration
             </span>

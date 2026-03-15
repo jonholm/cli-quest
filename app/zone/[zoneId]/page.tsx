@@ -1,10 +1,11 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { levelsByZone, zoneInfo } from '@/data/allLevels';
 import { useStore } from '@/lib/store';
 import type { ZoneType } from '@/lib/types';
+import { useGridNavigation } from '@/hooks/useGridNavigation';
 
 export default function ZonePage() {
   const params = useParams();
@@ -16,26 +17,28 @@ export default function ZonePage() {
   const zone = zoneInfo[zoneId];
   const levels = levelsByZone[zoneId] || [];
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        router.push('/hub');
-      } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        setSelectedLevel((prev) => (prev + 1) % levels.length);
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        setSelectedLevel((prev) => (prev - 1 + levels.length) % levels.length);
-      } else if (e.key === 'Enter' && levels.length > 0) {
-        e.preventDefault();
-        router.push(`/play/${levels[selectedLevel].id}`);
-      }
-    };
+  const handleConfirm = useCallback(() => {
+    if (levels.length > 0) {
+      router.push(`/play/${levels[selectedLevel].id}`);
+    }
+  }, [levels, selectedLevel, router]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedLevel, levels, router]);
+  const handleEscape = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      router.push('/hub');
+      return true;
+    }
+    return false;
+  }, [router]);
+
+  useGridNavigation({
+    itemCount: levels.length || 1,
+    selectedIndex: selectedLevel,
+    onSelect: setSelectedLevel,
+    onConfirm: handleConfirm,
+    additionalKeys: handleEscape,
+  });
 
   if (zoneId === 'sandbox') {
     router.push('/sandbox');
@@ -104,7 +107,7 @@ export default function ZonePage() {
               );
 
               return (
-                <div
+                <button
                   key={level.id}
                   onClick={() => {
                     if (!isLocked) {
@@ -113,7 +116,9 @@ export default function ZonePage() {
                     }
                   }}
                   onMouseEnter={() => !isLocked && setSelectedLevel(index)}
-                  className={`border-2 p-6 transition-all cursor-pointer outline-none ${
+                  aria-label={`Level ${level.id}: ${level.title}${isCompleted ? ' (completed)' : ''}${isLocked ? ' (locked)' : ''}`}
+                  aria-disabled={isLocked || undefined}
+                  className={`border-2 p-6 transition-all cursor-pointer outline-none text-left ${
                     isLocked
                       ? 'border-gray-600 opacity-50 cursor-not-allowed'
                       : isSelected
@@ -159,7 +164,7 @@ export default function ZonePage() {
                       </div>
                     )}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
