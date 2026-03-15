@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useGameStore } from '@/lib/store';
 import { validate } from '@cli-quest/engine';
 import Terminal from '@/components/Terminal';
-import { allLevels } from '@/data/ghost-arc';
+import { allLevels, getNextLevel } from '@/data/levels';
 import type { DialogueEntry } from '@cli-quest/shared';
 
 export default function PlayLevel() {
@@ -112,11 +112,7 @@ export default function PlayLevel() {
     );
   }
 
-  const nextLevel = allLevels.find(
-    (l) => l.arcId === level.arcId && l.chapter === level.chapter && l.position === level.position + 1
-  ) || allLevels.find(
-    (l) => l.arcId === level.arcId && l.chapter === level.chapter + 1 && l.position === 1
-  );
+  const nextLevel = getNextLevel(levelId);
 
   const characterColors: Record<string, string> = {
     Kai: 'text-cyber-green',
