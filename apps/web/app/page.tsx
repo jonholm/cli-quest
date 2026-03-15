@@ -1,101 +1,116 @@
-import Image from "next/image";
+'use client';
+
+import Link from 'next/link';
+import { useGameStore } from '@/lib/store';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { completedLevels, totalXP, commandsExecuted } = useGameStore();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <div className="flex-1 p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-bold text-cyber-green mb-4 tracking-wider glow-green">
+            CLI QUEST
+          </h1>
+          <p className="text-xl text-cyber-white mb-2">
+            Master the Command Line Through Adventure
+          </p>
+          <p className="text-cyber-muted">
+            Learn real CLI skills through narrative-driven challenges
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Story Arc Card */}
+          <Link
+            href="/play/ghost-1-1"
+            className="bg-cyber-gradient border border-cyber-purple rounded-xl p-6 hover:border-cyber-green transition-colors group"
+          >
+            <div className="text-cyber-green text-sm font-medium mb-2">STORY ARC</div>
+            <h2 className="text-2xl font-bold text-cyber-white mb-2 group-hover:text-cyber-green transition-colors">
+              Ghost in the Machine
+            </h2>
+            <p className="text-cyber-muted text-sm mb-4">
+              A cybersecurity thriller. Investigate anomalous server activity at NovaCorp.
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="bg-cyber-surface rounded-full h-2 flex-1">
+                <div
+                  className="bg-cyber-green rounded-full h-2 transition-all"
+                  style={{ width: `${Math.min(100, (completedLevels.filter(l => l.startsWith('ghost')).length / 18) * 100)}%` }}
+                />
+              </div>
+              <span className="text-cyber-muted text-xs">
+                {completedLevels.filter(l => l.startsWith('ghost')).length}/18
+              </span>
+            </div>
+          </Link>
+
+          {/* Daily Challenge Card */}
+          <Link
+            href="/daily"
+            className="bg-cyber-gradient border border-cyber-red/40 rounded-xl p-6 hover:border-cyber-red transition-colors group"
+          >
+            <div className="text-cyber-red text-sm font-medium mb-2">TODAY&apos;S CHALLENGE</div>
+            <h2 className="text-2xl font-bold text-cyber-white mb-2 group-hover:text-cyber-red transition-colors">
+              Daily Challenge
+            </h2>
+            <p className="text-cyber-muted text-sm mb-4">
+              Test your skills against a new challenge every day. Compete on the leaderboard.
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="bg-cyber-surface text-cyber-green px-2 py-1 rounded text-xs">Quick</span>
+              <span className="bg-cyber-surface text-cyber-yellow px-2 py-1 rounded text-xs">Standard</span>
+              <span className="bg-cyber-surface text-cyber-red px-2 py-1 rounded text-xs">Hard</span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="bg-cyber-surface border border-cyber-purple rounded-xl p-4 text-center">
+            <div className="text-3xl font-bold text-cyber-green mb-1">{totalXP}</div>
+            <div className="text-cyber-muted text-sm">Total XP</div>
+          </div>
+          <div className="bg-cyber-surface border border-cyber-purple rounded-xl p-4 text-center">
+            <div className="text-3xl font-bold text-cyber-yellow mb-1">{completedLevels.length}</div>
+            <div className="text-cyber-muted text-sm">Levels Complete</div>
+          </div>
+          <div className="bg-cyber-surface border border-cyber-purple rounded-xl p-4 text-center">
+            <div className="text-3xl font-bold text-cyber-teal mb-1">{commandsExecuted}</div>
+            <div className="text-cyber-muted text-sm">Commands Run</div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link
+            href="/sandbox"
+            className="bg-cyber-surface border border-cyber-purple rounded-xl p-4 hover:border-cyber-teal transition-colors text-center"
+          >
+            <div className="text-2xl mb-2">⌨️</div>
+            <div className="text-cyber-white font-medium">Sandbox</div>
+            <div className="text-cyber-muted text-xs mt-1">Free exploration</div>
+          </Link>
+          <Link
+            href="/skills"
+            className="bg-cyber-surface border border-cyber-purple rounded-xl p-4 hover:border-cyber-yellow transition-colors text-center"
+          >
+            <div className="text-2xl mb-2">🌳</div>
+            <div className="text-cyber-white font-medium">Skill Tree</div>
+            <div className="text-cyber-muted text-xs mt-1">Track mastery</div>
+          </Link>
+          <Link
+            href="/rankings"
+            className="bg-cyber-surface border border-cyber-purple rounded-xl p-4 hover:border-cyber-red transition-colors text-center"
+          >
+            <div className="text-2xl mb-2">🏆</div>
+            <div className="text-cyber-white font-medium">Rankings</div>
+            <div className="text-cyber-muted text-xs mt-1">Leaderboards</div>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  transpilePackages: ['@cli-quest/engine', '@cli-quest/shared'],
+};
 
 export default nextConfig;
