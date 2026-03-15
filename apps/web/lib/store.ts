@@ -5,6 +5,8 @@ import { persist } from 'zustand/middleware';
 import { createShell } from '@cli-quest/engine';
 import type { Shell } from '@cli-quest/engine';
 import type { FSNode, Env, Level } from '@cli-quest/shared';
+import { syncLevelCompletion, syncCommandMastery, updateStreak } from './sync';
+import { checkAndUnlockAchievements } from './achievements';
 
 export type HistoryEntry = {
   id: number;
@@ -31,6 +33,7 @@ interface GameStore {
   completedLevels: string[];
   totalXP: number;
   commandsExecuted: number;
+  currentStreak: number;
 
   // Actions
   initShell: (fs: FSNode, env?: Env, cwd?: string) => void;
@@ -57,6 +60,7 @@ export const useGameStore = create<GameStore>()(
       completedLevels: [],
       totalXP: 0,
       commandsExecuted: 0,
+      currentStreak: 0,
 
       initShell: (fs, env, cwd) => {
         const shell = createShell({
@@ -119,14 +123,29 @@ export const useGameStore = create<GameStore>()(
       },
 
       completeLevel: () => {
-        const { currentLevel, completedLevels, totalXP } = get();
+        const { currentLevel, completedLevels, totalXP, commandCount, hintsUsed, commandsUsed, levelStartTime } = get();
         if (!currentLevel) return;
-        if (!completedLevels.includes(currentLevel.id)) {
-          set({
-            completedLevels: [...completedLevels, currentLevel.id],
-            totalXP: totalXP + (currentLevel.xpReward || 0),
-          });
-        }
+        if (completedLevels.includes(currentLevel.id)) return;
+
+        const xp = currentLevel.xpReward || 0;
+        const timeSeconds = levelStartTime ? Math.floor((Date.now() - levelStartTime) / 1000) : 0;
+        const parAchieved = currentLevel.par ? commandCount <= currentLevel.par : false;
+
+        set({
+          completedLevels: [...completedLevels, currentLevel.id],
+          totalXP: totalXP + xp,
+        });
+
+        // Sync to Supabase (fire-and-forget)
+        syncLevelCompletion(currentLevel.id, commandCount, hintsUsed, parAchieved, timeSeconds, xp);
+        syncCommandMastery(commandsUsed);
+        updateStreak();
+        checkAndUnlockAchievements({
+          completedLevels: [...completedLevels, currentLevel.id],
+          totalXP: totalXP + xp,
+          commandsExecuted: get().commandsExecuted,
+          commandsUsed,
+        });
       },
 
       clearHistory: () => set({ history: [] }),
@@ -137,6 +156,7 @@ export const useGameStore = create<GameStore>()(
         completedLevels: state.completedLevels,
         totalXP: state.totalXP,
         commandsExecuted: state.commandsExecuted,
+        currentStreak: state.currentStreak,
       }),
     }
   )

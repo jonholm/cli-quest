@@ -15,7 +15,7 @@ const navItems = [
 
 export default function TopNav() {
   const pathname = usePathname();
-  const { totalXP, completedLevels } = useGameStore();
+  const { totalXP, completedLevels, currentStreak } = useGameStore();
   const { user, signOut } = useAuth();
 
   // Hide nav during gameplay
@@ -58,6 +58,7 @@ export default function TopNav() {
       </div>
       <div className="flex items-center gap-4">
         <span className="text-cyber-yellow text-sm font-medium">{totalXP} XP</span>
+        {currentStreak > 0 && <span className="text-cyber-red text-sm">🔥 {currentStreak}</span>}
         <span className="text-cyber-muted text-sm">{completedLevels.length} levels</span>
         {user ? (
           <div className="flex items-center gap-2">

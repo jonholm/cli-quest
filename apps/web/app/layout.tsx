@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import TopNav from '@/components/TopNav';
+import SyncProvider from '@/components/SyncProvider';
 
 export const metadata: Metadata = {
   title: 'CLI Quest',
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased min-h-screen flex flex-col">
-        <TopNav />
-        <main className="flex-1 flex flex-col">{children}</main>
+        <SyncProvider>
+          <TopNav />
+          <main className="flex-1 flex flex-col">{children}</main>
+        </SyncProvider>
       </body>
     </html>
   );
