@@ -1,5 +1,4 @@
-// Public API - will be implemented in Chunk 4
-// export { createShell } from './shell/shell';
-// export type { Shell, ShellOptions } from './shell/shell';
-// export { validate } from './validator/validator';
-// export { registerAllCommands } from './commands';
+export { createShell } from './shell/shell';
+export type { Shell, ShellOptions } from './shell/shell';
+export { validate } from './validator/validator';
+export { registerAllCommands } from './commands';
