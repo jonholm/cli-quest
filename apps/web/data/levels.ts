@@ -1,8 +1,9 @@
 import { ghostLevels } from './ghost-arc';
 import { tutorialLevels } from './tutorial-track';
+import { missionLevels } from './mission-arc';
 import type { Level } from '@cli-quest/shared';
 
-export const allLevels: Level[] = [...tutorialLevels, ...ghostLevels];
+export const allLevels: Level[] = [...tutorialLevels, ...ghostLevels, ...missionLevels];
 
 export const arcs = [
   {
@@ -26,6 +27,19 @@ export const arcs = [
       { number: 2, title: 'The Trail', levels: ghostLevels.filter(l => l.chapter === 2) },
       { number: 3, title: 'Containment', levels: ghostLevels.filter(l => l.chapter === 3) },
       { number: 4, title: 'The Truth', levels: ghostLevels.filter(l => l.chapter === 4) },
+    ],
+  },
+  {
+    id: 'mission',
+    title: 'Mission Control',
+    subtitle: 'Space Station Operations',
+    description: 'Maintain and repair the International Space Station Artemis. Your commands keep the crew alive.',
+    color: 'teal' as const,
+    levels: missionLevels,
+    chapters: [
+      { number: 1, title: 'Arrival', levels: missionLevels.filter(l => l.chapter === 1) },
+      { number: 2, title: 'Diagnostics', levels: missionLevels.filter(l => l.chapter === 2) },
+      { number: 3, title: 'Repair', levels: missionLevels.filter(l => l.chapter === 3) },
     ],
   },
 ];

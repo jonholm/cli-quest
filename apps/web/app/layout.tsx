@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import TopNav from '@/components/TopNav';
 import SyncProvider from '@/components/SyncProvider';
+import AchievementToast from '@/components/AchievementToast';
 
 export const metadata: Metadata = {
   title: 'CLI Quest',
@@ -19,6 +20,7 @@ export default function RootLayout({
         <SyncProvider>
           <TopNav />
           <main className="flex-1 flex flex-col">{children}</main>
+          <AchievementToast />
         </SyncProvider>
       </body>
     </html>

@@ -6,6 +6,7 @@ import { useGameStore } from '@/lib/store';
 import { validate } from '@cli-quest/engine';
 import Terminal from '@/components/Terminal';
 import { allLevels, getNextLevel } from '@/data/levels';
+import { motion } from 'framer-motion';
 import type { DialogueEntry } from '@cli-quest/shared';
 
 export default function PlayLevel() {
@@ -206,14 +207,28 @@ export default function PlayLevel() {
 
       {/* Level Complete Modal */}
       {showComplete && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', damping: 15, stiffness: 300, delay: 0.1 }}
             role="dialog"
             aria-modal="true"
             aria-label="Level complete"
             className="bg-cyber-bg border-2 border-cyber-green rounded-xl p-8 max-w-md"
           >
-            <h2 className="text-3xl font-bold text-cyber-green mb-4 glow-green">LEVEL COMPLETE!</h2>
+            <motion.h2
+              initial={{ y: -20 }}
+              animate={{ y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-3xl font-bold text-cyber-green mb-4 glow-green"
+            >
+              LEVEL COMPLETE!
+            </motion.h2>
             <p className="text-cyber-white mb-4">{level.briefing}</p>
             <div className="mb-6 text-cyber-muted">
               <div>Commands used: {commandCount}</div>
@@ -243,8 +258,8 @@ export default function PlayLevel() {
                 Level Select
               </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );

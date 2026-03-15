@@ -4,9 +4,12 @@ import Link from 'next/link';
 import { useGameStore } from '@/lib/store';
 import { arcs } from '@/data/levels';
 
-const colorMap = {
+const colorMap: Record<string, { border: string; text: string; bg: string }> = {
   green: { border: 'border-cyber-green', text: 'text-cyber-green', bg: 'bg-cyber-green' },
   purple: { border: 'border-purple-500', text: 'text-purple-400', bg: 'bg-purple-500' },
+  teal: { border: 'border-cyber-teal', text: 'text-cyber-teal', bg: 'bg-cyber-teal' },
+  red: { border: 'border-cyber-red', text: 'text-cyber-red', bg: 'bg-cyber-red' },
+  yellow: { border: 'border-cyber-yellow', text: 'text-cyber-yellow', bg: 'bg-cyber-yellow' },
 };
 
 export default function ArcsPage() {

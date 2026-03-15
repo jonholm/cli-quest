@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { triggerAchievementToast } from '@/components/AchievementToast';
 
 export type AchievementDef = {
   id: string;
@@ -73,6 +74,11 @@ export async function checkAndUnlockAchievements(ctx: AchievementContext) {
         achievement_id: achievement.id,
       });
       newlyUnlocked.push(achievement);
+      triggerAchievementToast({
+        icon: achievement.icon,
+        title: achievement.title,
+        description: achievement.description,
+      });
     }
   }
 
