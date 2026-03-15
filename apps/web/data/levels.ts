@@ -2,9 +2,10 @@ import { ghostLevels } from './ghost-arc';
 import { tutorialLevels } from './tutorial-track';
 import { missionLevels } from './mission-arc';
 import { startupLevels } from './startup-arc';
+import { heistLevels } from './heist-arc';
 import type { Level } from '@cli-quest/shared';
 
-export const allLevels: Level[] = [...tutorialLevels, ...ghostLevels, ...missionLevels, ...startupLevels];
+export const allLevels: Level[] = [...tutorialLevels, ...ghostLevels, ...missionLevels, ...startupLevels, ...heistLevels];
 
 export const arcs = [
   {
@@ -54,6 +55,19 @@ export const arcs = [
       { number: 1, title: 'Day One', levels: startupLevels.filter(l => l.chapter === 1) },
       { number: 2, title: 'The Incident', levels: startupLevels.filter(l => l.chapter === 2) },
       { number: 3, title: 'Going Pro', levels: startupLevels.filter(l => l.chapter === 3) },
+    ],
+  },
+  {
+    id: 'heist',
+    title: 'Data Heist',
+    subtitle: 'Digital Forensics Investigation',
+    description: 'A major data breach at DataVault Inc. Analyze logs, trace the attacker, and build the case for prosecution.',
+    color: 'yellow' as const,
+    levels: heistLevels,
+    chapters: [
+      { number: 1, title: 'The Job', levels: heistLevels.filter(l => l.chapter === 1) },
+      { number: 2, title: 'The Evidence', levels: heistLevels.filter(l => l.chapter === 2) },
+      { number: 3, title: 'The Report', levels: heistLevels.filter(l => l.chapter === 3) },
     ],
   },
 ];

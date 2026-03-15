@@ -12,6 +12,7 @@ export default function Home() {
   const ghostCompleted = completedLevels.filter(l => l.startsWith('ghost')).length;
   const missionCompleted = completedLevels.filter(l => l.startsWith('mission')).length;
   const startupCompleted = completedLevels.filter(l => l.startsWith('startup')).length;
+  const heistCompleted = completedLevels.filter(l => l.startsWith('heist')).length;
   const hasStarted = completedLevels.length > 0;
 
   return (
@@ -45,7 +46,7 @@ export default function Home() {
           </div>
         ) : null}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {/* Tutorial Card */}
           <Link
             href={tutorialCompleted >= 10 ? '/arcs/tutorial' : `/play/tutorial-${Math.min(tutorialCompleted + 1, 10)}`}
@@ -135,6 +136,29 @@ export default function Home() {
                 />
               </div>
               <span className="text-cyber-muted text-xs">{startupCompleted}/9</span>
+            </div>
+          </Link>
+
+          {/* Data Heist Card */}
+          <Link
+            href={heistCompleted > 0 ? '/arcs/heist' : '/play/heist-1-1'}
+            className="bg-cyber-gradient border border-cyber-yellow/40 rounded-xl p-6 hover:border-cyber-yellow transition-colors group"
+          >
+            <div className="text-cyber-yellow text-sm font-medium mb-2">STORY ARC</div>
+            <h2 className="text-2xl font-bold text-cyber-white mb-2 group-hover:text-cyber-yellow transition-colors">
+              Data Heist
+            </h2>
+            <p className="text-cyber-muted text-sm mb-4">
+              Digital forensics. Trace a data breach and build the case for prosecution.
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="bg-cyber-surface rounded-full h-2 flex-1">
+                <div
+                  className="bg-cyber-yellow rounded-full h-2 transition-all"
+                  style={{ width: `${(heistCompleted / 9) * 100}%` }}
+                />
+              </div>
+              <span className="text-cyber-muted text-xs">{heistCompleted}/9</span>
             </div>
           </Link>
         </div>

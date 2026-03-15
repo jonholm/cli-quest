@@ -3,6 +3,7 @@ import './globals.css';
 import TopNav from '@/components/TopNav';
 import SyncProvider from '@/components/SyncProvider';
 import AchievementToast from '@/components/AchievementToast';
+import KeyboardShortcuts from '@/components/KeyboardShortcuts';
 
 export const metadata: Metadata = {
   title: 'CLI Quest',
@@ -21,6 +22,7 @@ export default function RootLayout({
           <TopNav />
           <main className="flex-1 flex flex-col">{children}</main>
           <AchievementToast />
+          <KeyboardShortcuts />
         </SyncProvider>
       </body>
     </html>
