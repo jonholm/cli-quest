@@ -5,111 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useGameStore } from '@/lib/store';
 import Terminal from '@/components/Terminal';
 import { validate } from '@cli-quest/engine';
-import type { FSNode, ValidatorConfig } from '@cli-quest/shared';
-
-type ChallengeTemplate = {
-  tier: 'quick' | 'standard' | 'hard';
-  title: string;
-  objective: string;
-  fs: FSNode;
-  validator: ValidatorConfig;
-  xpReward: number;
-};
+import { templates, type ChallengeTemplate } from '@/data/challenge-templates';
 
 // Date-seeded selection
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 }
-
-const templates: ChallengeTemplate[] = [
-  // Quick
-  {
-    tier: 'quick', title: 'Find the File', objective: 'Use find to locate all .log files',
-    xpReward: 25,
-    fs: { type: 'directory', name: '', children: [{ type: 'directory', name: 'home', children: [{ type: 'directory', name: 'user', children: [
-      { type: 'directory', name: 'logs', children: [
-        { type: 'file', name: 'app.log', content: 'app log' },
-        { type: 'file', name: 'error.log', content: 'error log' },
-        { type: 'file', name: 'config.yml', content: 'port: 3000' },
-      ]},
-    ]}]}]},
-    validator: { type: 'all', conditions: [{ type: 'commandUsed', command: 'find' }, { type: 'outputContains', substring: 'app.log' }] },
-  },
-  {
-    tier: 'quick', title: 'Count Lines', objective: 'Count the number of lines in data.txt',
-    xpReward: 25,
-    fs: { type: 'directory', name: '', children: [{ type: 'directory', name: 'home', children: [{ type: 'directory', name: 'user', children: [
-      { type: 'file', name: 'data.txt', content: 'alpha\nbeta\ngamma\ndelta\nepsilon' },
-    ]}]}]},
-    validator: { type: 'all', conditions: [{ type: 'commandUsed', command: 'wc' }, { type: 'outputContains', substring: '5' }] },
-  },
-  {
-    tier: 'quick', title: 'Create and Navigate', objective: 'Create a directory called "work" and navigate into it',
-    xpReward: 25,
-    fs: { type: 'directory', name: '', children: [{ type: 'directory', name: 'home', children: [{ type: 'directory', name: 'user', children: []}]}]},
-    validator: { type: 'all', conditions: [{ type: 'fileExists', path: '/home/user/work' }, { type: 'currentPath', path: '/home/user/work' }] },
-  },
-  // Standard
-  {
-    tier: 'standard', title: 'Log Analysis', objective: 'Find all ERROR lines in server.log and count them',
-    xpReward: 50,
-    fs: { type: 'directory', name: '', children: [{ type: 'directory', name: 'home', children: [{ type: 'directory', name: 'user', children: [
-      { type: 'file', name: 'server.log', content: 'INFO: started\nERROR: connection refused\nINFO: retrying\nERROR: timeout\nINFO: connected\nERROR: disk full\nINFO: cleanup done' },
-    ]}]}]},
-    validator: { type: 'all', conditions: [{ type: 'commandUsed', command: 'grep' }, { type: 'commandUsed', command: 'wc' }, { type: 'outputContains', substring: '3' }] },
-  },
-  {
-    tier: 'standard', title: 'File Organizer', objective: 'Move report.txt to the archive directory and copy config.yml to backup',
-    xpReward: 50,
-    fs: { type: 'directory', name: '', children: [{ type: 'directory', name: 'home', children: [{ type: 'directory', name: 'user', children: [
-      { type: 'file', name: 'report.txt', content: 'quarterly report' },
-      { type: 'file', name: 'config.yml', content: 'env: production' },
-      { type: 'directory', name: 'archive', children: [] },
-      { type: 'directory', name: 'backup', children: [] },
-    ]}]}]},
-    validator: { type: 'all', conditions: [
-      { type: 'fileExists', path: '/home/user/archive/report.txt' },
-      { type: 'fileNotExists', path: '/home/user/report.txt' },
-      { type: 'fileExists', path: '/home/user/backup/config.yml' },
-      { type: 'fileExists', path: '/home/user/config.yml' },
-    ]},
-  },
-  {
-    tier: 'standard', title: 'Data Pipeline', objective: 'Sort the names file and save unique entries to output.txt',
-    xpReward: 50,
-    fs: { type: 'directory', name: '', children: [{ type: 'directory', name: 'home', children: [{ type: 'directory', name: 'user', children: [
-      { type: 'file', name: 'names.txt', content: 'Charlie\nAlice\nBob\nAlice\nDave\nBob\nEve' },
-    ]}]}]},
-    validator: { type: 'all', conditions: [
-      { type: 'fileExists', path: '/home/user/output.txt' },
-      { type: 'fileContains', path: '/home/user/output.txt', substring: 'Alice' },
-      { type: 'commandUsed', command: 'sort' },
-    ]},
-  },
-  // Hard
-  {
-    tier: 'hard', title: 'Incident Response', objective: 'Find all 403 responses in access.log, count unique IPs, and save results to report.txt',
-    xpReward: 100,
-    fs: { type: 'directory', name: '', children: [{ type: 'directory', name: 'home', children: [{ type: 'directory', name: 'user', children: [
-      { type: 'file', name: 'access.log', content: '10.0.0.1 GET /api 200\n10.0.0.5 GET /admin 403\n10.0.0.1 GET /api 200\n10.0.0.5 GET /admin/config 403\n10.0.0.3 POST /login 401\n10.0.0.5 GET /admin/users 403\n10.0.0.7 GET /secret 403\n10.0.0.1 GET /api 200' },
-    ]}]}]},
-    validator: { type: 'all', conditions: [
-      { type: 'fileExists', path: '/home/user/report.txt' },
-      { type: 'commandUsed', command: 'grep' },
-    ]},
-  },
-  {
-    tier: 'hard', title: 'Environment Setup', objective: 'Set APP_ENV to "production", create a deploy directory, and write the env var to deploy/config.txt',
-    xpReward: 100,
-    fs: { type: 'directory', name: '', children: [{ type: 'directory', name: 'home', children: [{ type: 'directory', name: 'user', children: []}]}]},
-    validator: { type: 'all', conditions: [
-      { type: 'envVar', name: 'APP_ENV', value: 'production' },
-      { type: 'fileExists', path: '/home/user/deploy/config.txt' },
-      { type: 'fileContains', path: '/home/user/deploy/config.txt', substring: 'production' },
-    ]},
-  },
-];
 
 function getDailyChallenge(tier: 'quick' | 'standard' | 'hard'): ChallengeTemplate {
   const tierTemplates = templates.filter(t => t.tier === tier);

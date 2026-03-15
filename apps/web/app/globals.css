@@ -28,3 +28,10 @@ body {
 .glow-green {
   text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
 }
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .terminal-input {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+}

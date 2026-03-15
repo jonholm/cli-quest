@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useGameStore } from '@/lib/store';
+import ReviewQueue from '@/components/ReviewQueue';
 
 export default function Home() {
   const { completedLevels, totalXP, commandsExecuted } = useGameStore();
@@ -87,6 +88,9 @@ export default function Home() {
             </div>
           </Link>
         </div>
+
+        {/* Review Queue */}
+        <ReviewQueue />
 
         {/* Daily Challenge Card */}
         <Link

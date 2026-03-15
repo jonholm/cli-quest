@@ -27,7 +27,7 @@ export default function PlayLevel() {
 
   const [showComplete, setShowComplete] = useState(false);
   const [hintMessage, setHintMessage] = useState<string | null>(null);
-  const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const [panelCollapsed, setPanelCollapsed] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
   const [visibleDialogue, setVisibleDialogue] = useState<DialogueEntry[]>([]);
 
   const level = allLevels.find((l) => l.id === levelId);
@@ -128,12 +128,15 @@ export default function PlayLevel() {
           <button onClick={() => router.push('/')} className="text-cyber-muted text-sm hover:text-cyber-white">
             ← Back
           </button>
-          <span className="text-cyber-green font-medium text-sm">
+          <span className="text-cyber-green font-medium text-sm hidden sm:inline">
             Ch.{level.chapter} Level {level.position}: {level.title}
+          </span>
+          <span className="text-cyber-green font-medium text-sm sm:hidden">
+            {level.title}
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-cyber-muted text-xs">ESC: Exit</span>
+          <span className="text-cyber-muted text-xs hidden sm:inline">ESC: Exit</span>
           <button onClick={handleHint} className="text-cyber-yellow text-xs hover:text-cyber-white">
             ⌘H Hint ({hintsUsed}/{level.hints.length})
           </button>
