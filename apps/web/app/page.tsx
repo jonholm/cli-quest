@@ -38,7 +38,7 @@ export default function Home() {
               <div className="bg-cyber-surface rounded-full h-2 flex-1">
                 <div
                   className="bg-cyber-green rounded-full h-2 transition-all"
-                  style={{ width: `${Math.min(100, (completedLevels.filter(l => l.startsWith('ghost')).length / 18) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (completedLevels.filter(l => l.startsWith('ghost')).length / 18) * 100)}%` } as React.CSSProperties}
                 />
               </div>
               <span className="text-cyber-muted text-xs">
