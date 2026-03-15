@@ -81,11 +81,11 @@ Input string
 | Command history | Up/down arrow recall, stored per session |
 | Tab completion | Context-aware: commands, file paths, flags |
 
-### Commands (22 for MVP)
+### Commands (23 for MVP)
 
 **Retained from V1 (16)**: `pwd`, `ls`, `cd`, `cat`, `mkdir`, `touch`, `rm`, `cp`, `mv`, `grep`, `find`, `head`, `tail`, `wc`, `echo`, `clear`
 
-**New (6)**: `export`, `env`, `chmod`, `sort`, `uniq`, `man`, `history`
+**New (7)**: `export`, `env`, `chmod`, `sort`, `uniq`, `man`, `history`
 
 ### Public API
 
@@ -99,9 +99,10 @@ const completions = shell.complete("cat he", cursorPos);
 // → ["hello.txt", "headers.csv"]
 
 shell.historyUp() / shell.historyDown()
+// → returns previous/next command string, or null
 ```
 
-Every `execute()` call returns new immutable state (filesystem, env). The shell is stateless — the caller owns the state and passes it back in. This makes undo, replay, and validation trivial.
+The filesystem and environment are immutable — every `execute()` returns new state, and the caller passes it back in. This makes undo, replay, and validation trivial. Command history is the one piece of mutable internal state the shell holds, since it is session-scoped and not part of the game state. The shell can be constructed with an initial history array for testing.
 
 ---
 
@@ -172,7 +173,28 @@ validator: {
 }
 ```
 
+Supported condition types for MVP:
+- `fileExists` / `fileNotExists` — check path presence
+- `fileContains` / `fileNotContains` — check file content substring
+- `directoryContains` — check that a directory has a child by name
+- `currentPath` — check current working directory
+- `commandUsed` — check that a command was used during the level
+- `outputContains` — check last command output
+- `envVar` — check environment variable value
+
+Combinators: `all` (AND) and `any` (OR), nestable.
+
 This makes levels data-driven. Community members could eventually create levels through a form with no code needed.
+
+### Sandbox Mode
+
+Free exploration mode with no objectives, story, or validation:
+- Accessible from the top nav (Play → Sandbox) without auth
+- Pre-seeded filesystem: `/home/user` with a `welcome.txt` explaining available commands
+- All 23 commands available
+- Full shell capabilities (pipes, redirection, env vars)
+- No XP, no timer, no leaderboard — pure practice
+- Command mastery still tracks (if logged in) so sandbox practice prevents decay
 
 ---
 
@@ -197,7 +219,7 @@ A constellation-style branching node graph where each node represents a command 
 
 - One new challenge per day, available to all users
 - 3 difficulty tiers: Quick (2 min), Standard (5 min), Hard (10 min)
-- Generated from a pool of challenge templates seeded by date
+- Generated from a pool of challenge templates seeded by date. Each template defines: a filesystem factory (parameterized), an objective description template, a validator config, and a difficulty tier. MVP needs ~30 templates (10 per tier) to provide variety. The `generate-daily-challenge` edge function uses `date` as a seed to deterministically pick one template per tier, instantiates the filesystem with randomized file names/content, and writes three rows to `daily_challenges`.
 - Leaderboard for fastest completion per tier
 - Completing any tier extends streak
 
@@ -222,10 +244,11 @@ A constellation-style branching node graph where each node represents a command 
 
 ### Spaced Repetition
 
-- Engine tracks per-user command last-used timestamps
-- Commands approaching decay threshold (7 days unused) appear in "Review" queue
-- Review challenges: micro-levels, 1-2 minutes, focused on the rusty command
-- Completing reviews restores mastery tier on skill tree
+- Engine tracks per-user command last-used timestamps in `command_mastery` table
+- Decay is a cliff at 7 days: once `last_used_at` is >7 days ago, `mastery_tier` drops one level (Mastered → Practiced, Practiced → Learned). The `decay-check` edge function runs weekly and processes all users.
+- Decayed commands appear in a "Review" queue on the dashboard, capped at 3 pending reviews at a time
+- Review challenges are generated from templates: each command has 2-3 template micro-levels (hand-authored, stored as seed data) that present a small filesystem and a single objective exercising that command. Template selection is random.
+- Completing a review restores the previous mastery tier and resets `last_used_at`
 
 ---
 
@@ -239,20 +262,21 @@ A constellation-style branching node graph where each node represents a command 
 
 **command_mastery**: `user_id` → users, `command_name`, `times_used`, `mastery_tier` (learned/practiced/mastered), `last_used_at`, `decay_notified`
 
-**daily_challenges**: `id`, `date` (unique), `tier`, `config` (jsonb — level definition), `created_at`
+**daily_challenges**: `id`, `date`, `tier`, `config` (jsonb — level definition), `created_at`. Unique constraint on `(date, tier)` — three rows per day, one per tier.
 
 **daily_challenge_results**: `user_id` → users, `challenge_id` → daily_challenges, `completed_at`, `time_seconds`, `commands_used`
 
 **achievements**: `user_id` → users, `achievement_id`, `unlocked_at`
 
-**community_levels** (post-MVP, schema ready): `id`, `author_id` → users, `title`, `description`, `difficulty`, `arc_id`, `level_config` (jsonb), `published`, `play_count`, `rating_avg`, `created_at`
+**community_levels** (post-MVP, not included in MVP migrations)
 
 ### Auth
 
 - Supabase Auth with GitHub and Google OAuth
 - Magic link (email) as fallback
 - Guest mode: play tutorial and first chapter without signup, prompted to create account to save progress
-- On signup: migrate localStorage progress to account
+- Guest progress stored in localStorage: `{ completedLevels: string[], totalXP: number, commandsExecuted: number, commandMastery: Record<string, { timesUsed: number, lastUsed: string }> }`
+- On signup: migration edge function reads this localStorage blob, creates corresponding `user_progress` and `command_mastery` rows, then clears localStorage. If the user has already completed a level server-side (e.g., signed up on another device), server data wins — no duplicates.
 
 ### Edge Functions
 
@@ -313,7 +337,7 @@ Horizontal nav across the top with text labels: Play, Skill Tree, Daily, Ranking
 
 | Feature | Scope |
 |---------|-------|
-| Shell engine | Pipes, redirection, env vars, wildcards, quoting, history, tab completion. 22 commands. |
+| Shell engine | Pipes, redirection, env vars, wildcards, quoting, history, tab completion. 23 commands. |
 | Story arc | "Ghost in the Machine" — 4 chapters, 15-20 levels, full narrative |
 | Tutorial track | 10-12 guided lessons for beginners |
 | Auth | Supabase — GitHub + Google OAuth, guest mode with upgrade |
