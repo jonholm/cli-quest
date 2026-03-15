@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { triggerAchievementToast } from '@/components/AchievementToast';
+import { playAchievementSound } from './sounds';
 
 export type AchievementDef = {
   id: string;
@@ -79,6 +80,7 @@ export async function checkAndUnlockAchievements(ctx: AchievementContext) {
         title: achievement.title,
         description: achievement.description,
       });
+      playAchievementSound();
     }
   }
 

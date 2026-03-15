@@ -7,6 +7,7 @@ import { validate } from '@cli-quest/engine';
 import Terminal from '@/components/Terminal';
 import { allLevels, getNextLevel } from '@/data/levels';
 import { motion } from 'framer-motion';
+import { playSuccessSound, playHintSound } from '@/lib/sounds';
 import type { DialogueEntry } from '@cli-quest/shared';
 
 export default function PlayLevel() {
@@ -71,6 +72,7 @@ export default function PlayLevel() {
 
     if (validate(level.validator, validationState)) {
       completeLevel();
+      playSuccessSound();
       setTimeout(() => setShowComplete(true), 500);
     }
   }, [history, commandsUsed, level, showComplete, shell, completeLevel]);
@@ -80,6 +82,7 @@ export default function PlayLevel() {
     const hint = level.hints[hintsUsed];
     if (hint) {
       setHintMessage(hint.text);
+      playHintSound();
       useGameStore.setState({ hintsUsed: hintsUsed + 1 });
       setTimeout(() => setHintMessage(null), 5000);
     }

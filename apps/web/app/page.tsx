@@ -11,6 +11,7 @@ export default function Home() {
   const tutorialCompleted = completedLevels.filter(l => l.startsWith('tutorial')).length;
   const ghostCompleted = completedLevels.filter(l => l.startsWith('ghost')).length;
   const missionCompleted = completedLevels.filter(l => l.startsWith('mission')).length;
+  const startupCompleted = completedLevels.filter(l => l.startsWith('startup')).length;
   const hasStarted = completedLevels.length > 0;
 
   return (
@@ -44,7 +45,7 @@ export default function Home() {
           </div>
         ) : null}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Tutorial Card */}
           <Link
             href={tutorialCompleted >= 10 ? '/arcs/tutorial' : `/play/tutorial-${Math.min(tutorialCompleted + 1, 10)}`}
@@ -111,6 +112,29 @@ export default function Home() {
                 />
               </div>
               <span className="text-cyber-muted text-xs">{missionCompleted}/9</span>
+            </div>
+          </Link>
+
+          {/* Startup Mode Card */}
+          <Link
+            href={startupCompleted > 0 ? '/arcs/startup' : '/play/startup-1-1'}
+            className="bg-cyber-gradient border border-cyber-red/40 rounded-xl p-6 hover:border-cyber-red transition-colors group"
+          >
+            <div className="text-cyber-red text-sm font-medium mb-2">STORY ARC</div>
+            <h2 className="text-2xl font-bold text-cyber-white mb-2 group-hover:text-cyber-red transition-colors">
+              Startup Mode
+            </h2>
+            <p className="text-cyber-muted text-sm mb-4">
+              Solo DevOps at a viral startup. Fix everything before the investors notice.
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="bg-cyber-surface rounded-full h-2 flex-1">
+                <div
+                  className="bg-cyber-red rounded-full h-2 transition-all"
+                  style={{ width: `${(startupCompleted / 9) * 100}%` }}
+                />
+              </div>
+              <span className="text-cyber-muted text-xs">{startupCompleted}/9</span>
             </div>
           </Link>
         </div>

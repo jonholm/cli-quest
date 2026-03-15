@@ -1,9 +1,10 @@
 import { ghostLevels } from './ghost-arc';
 import { tutorialLevels } from './tutorial-track';
 import { missionLevels } from './mission-arc';
+import { startupLevels } from './startup-arc';
 import type { Level } from '@cli-quest/shared';
 
-export const allLevels: Level[] = [...tutorialLevels, ...ghostLevels, ...missionLevels];
+export const allLevels: Level[] = [...tutorialLevels, ...ghostLevels, ...missionLevels, ...startupLevels];
 
 export const arcs = [
   {
@@ -40,6 +41,19 @@ export const arcs = [
       { number: 1, title: 'Arrival', levels: missionLevels.filter(l => l.chapter === 1) },
       { number: 2, title: 'Diagnostics', levels: missionLevels.filter(l => l.chapter === 2) },
       { number: 3, title: 'Repair', levels: missionLevels.filter(l => l.chapter === 3) },
+    ],
+  },
+  {
+    id: 'startup',
+    title: 'Startup Mode',
+    subtitle: 'Solo DevOps at a Viral Startup',
+    description: 'You\'re the only DevOps engineer at ShipFast. The app just went viral. Fix everything before the investors notice.',
+    color: 'red' as const,
+    levels: startupLevels,
+    chapters: [
+      { number: 1, title: 'Day One', levels: startupLevels.filter(l => l.chapter === 1) },
+      { number: 2, title: 'The Incident', levels: startupLevels.filter(l => l.chapter === 2) },
+      { number: 3, title: 'Going Pro', levels: startupLevels.filter(l => l.chapter === 3) },
     ],
   },
 ];

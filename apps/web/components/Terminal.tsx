@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { useGameStore } from '@/lib/store';
+import { playCommandSound, playErrorSound, playTabCompleteSound } from '@/lib/sounds';
 
 export default function Terminal() {
   const [input, setInput] = useState('');
@@ -26,6 +27,13 @@ export default function Terminal() {
     if (e.key === 'Enter' && input.trim()) {
       executeCommand(input);
       setInput('');
+      // Play sound based on last result (check next render)
+      setTimeout(() => {
+        const h = useGameStore.getState().history;
+        const last = h[h.length - 1];
+        if (last?.isError) playErrorSound();
+        else playCommandSound();
+      }, 0);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       const prev = shell?.historyUp();
@@ -42,6 +50,7 @@ export default function Terminal() {
           const parts = input.split(/\s+/);
           parts[parts.length - 1] = completions[0];
           setInput(parts.join(' '));
+          playTabCompleteSound();
         }
       }
     }
