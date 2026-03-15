@@ -6,6 +6,7 @@ import { useGameStore } from '@/lib/store';
 
 const navItems = [
   { href: '/', label: 'Play' },
+  { href: '/arcs', label: 'Arcs' },
   { href: '/skills', label: 'Skill Tree' },
   { href: '/daily', label: 'Daily' },
   { href: '/rankings', label: 'Rankings' },
